@@ -23,10 +23,17 @@ class CoursesController extends Controller
 
     public function store(Request $request)
     {
-        $course=Course::create($request->all());
-        Mail::to('pruebas@zeroazul.com')->queue(new CourseRegisterEmail($course));
+        $this->validate($request,[
+            'name' => 'required'
+        ]);
 
-        return $course;
+        $course = New Course;
+        $course->name = $request->name;
+        $course->description = $request->description;
+        $course->save();
+        //$course=Course::create($request->all());
+        Mail::to('pruebas@zeroazul.com')->queue(new CourseRegisterEmail($course));
+        return response()->json($course);
     }
 
 

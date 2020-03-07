@@ -98,6 +98,7 @@
               <div class="form-group">
                 <label for="name">Nombre del Curso</label>
                 <input type="text" class="form-control"  v-model="course.name" id="name" aria-describedby="emailHelp" placeholder="Nombre del curso">
+                <span v-for="error in errors" class="text-danger">{{error}}</span>
               </div>
               <div class="form-group">
                 <label for="description">Descripción del Curso</label>
@@ -125,6 +126,7 @@
           <form @submit.prevent="udpdateCourse(course)">
             <label for="nombre">Nombre de Curso</label>
             <input type="text" class="form-control" id="nombre" v-model="course.name" placeholder="Nombre del curso">
+            <span v-for="error in errors" class="text-danger">{{error}}</span>
             <label for="description">Descripcion del Curso</label>
             <textarea name="description" v-model="course.description" class="form-control" style="resize: none"></textarea>
             <div class="modal-footer">
@@ -149,6 +151,7 @@
                     description: ''
                 },
                 formEditar: false,
+                errors:[],
             }
         },
 
@@ -172,15 +175,19 @@
                     name: this.course.name,
                     description: this.course.description
                 };
-                this.course.name = '',
-                    this.course.description = '',
-                    $('#exampleModal').modal('hide');
-                axios.post(url, parametros).then(res => {
-                    alert('El registro se agrego con exito')
-                    this.courses.push(res.data).sort(res.data)
-                }).catch(function (error) {
-                    console.log(error);
-                })
+                if (!this.course.name){
+                    this.errors.push('Este campo es Obligatorio')
+                }else {
+                    this.course.name = '',
+                        this.course.description = '',
+                        axios.post(url, parametros).then(res => {
+                            $('#exampleModal').modal('hide');
+                            alert('El registro se agrego con exito')
+                            this.courses.push(res.data).sort(res.data)
+                        }).catch(error => {
+                            console.log(error);
+                        })
+                }
             },
 
             editCourse(item) {
@@ -196,19 +203,24 @@
                     name: this.course.name,
                     description: this.course.description
                 };
-                this.formEditar = false;
-                this.course.name = '';
-                this.course.description = '';
-                axios.put(`/cursos/update/${course.id}`, parametros).then((res) => {
-                    //buscar index
-                    const index = this.courses.findIndex(item => item.id === course.id)
-                    this.courses[index] = res.data;
-                    $('#editarCourse').modal('hide');
-                    axios.get('/cursos').then(res => {
-                        let datos = this.courses = res.data;
-                        datos.sort();
+                if (!this.course.name){
+                    this.errors.push('Este campo es Obligatorio')
+                }else {
+                    this.formEditar = false;
+                    this.course.name = '';
+                    this.course.description = '';
+                    axios.put(`/cursos/update/${course.id}`, parametros).then((res) => {
+                        //buscar index
+                        const index = this.courses.findIndex(item => item.id === course.id)
+                        this.courses[index] = res.data;
+                        alert('El registro se actializo con exito')
+                        $('#editarCourse').modal('hide');
+                        axios.get('/cursos').then(res => {
+                            let datos = this.courses = res.data;
+                            datos.sort();
+                        })
                     })
-                })
+                }
             },
 
             deleteCourse(course, index) {

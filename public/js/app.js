@@ -2049,6 +2049,8 @@ __webpack_require__.r(__webpack_exports__);
 //
 //
 //
+//
+//
 /* harmony default export */ __webpack_exports__["default"] = ({
   data: function data() {
     return {
@@ -2057,7 +2059,8 @@ __webpack_require__.r(__webpack_exports__);
         name: '',
         description: ''
       },
-      formEditar: false
+      formEditar: false,
+      errors: []
     };
   },
   created: function created() {
@@ -2084,14 +2087,19 @@ __webpack_require__.r(__webpack_exports__);
         name: this.course.name,
         description: this.course.description
       };
-      this.course.name = '', this.course.description = '', $('#exampleModal').modal('hide');
-      axios.post(url, parametros).then(function (res) {
-        alert('El registro se agrego con exito');
 
-        _this2.courses.push(res.data).sort(res.data);
-      })["catch"](function (error) {
-        console.log(error);
-      });
+      if (!this.course.name) {
+        this.errors.push('Este campo es Obligatorio');
+      } else {
+        this.course.name = '', this.course.description = '', axios.post(url, parametros).then(function (res) {
+          $('#exampleModal').modal('hide');
+          alert('El registro se agrego con exito');
+
+          _this2.courses.push(res.data).sort(res.data);
+        })["catch"](function (error) {
+          console.log(error);
+        });
+      }
     },
     editCourse: function editCourse(item) {
       $('#editarCourse').modal('show');
@@ -2107,22 +2115,28 @@ __webpack_require__.r(__webpack_exports__);
         name: this.course.name,
         description: this.course.description
       };
-      this.formEditar = false;
-      this.course.name = '';
-      this.course.description = '';
-      axios.put("/cursos/update/".concat(course.id), parametros).then(function (res) {
-        //buscar index
-        var index = _this3.courses.findIndex(function (item) {
-          return item.id === course.id;
-        });
 
-        _this3.courses[index] = res.data;
-        $('#editarCourse').modal('hide');
-        axios.get('/cursos').then(function (res) {
-          var datos = _this3.courses = res.data;
-          datos.sort();
+      if (!this.course.name) {
+        this.errors.push('Este campo es Obligatorio');
+      } else {
+        this.formEditar = false;
+        this.course.name = '';
+        this.course.description = '';
+        axios.put("/cursos/update/".concat(course.id), parametros).then(function (res) {
+          //buscar index
+          var index = _this3.courses.findIndex(function (item) {
+            return item.id === course.id;
+          });
+
+          _this3.courses[index] = res.data;
+          alert('El registro se actializo con exito');
+          $('#editarCourse').modal('hide');
+          axios.get('/cursos').then(function (res) {
+            var datos = _this3.courses = res.data;
+            datos.sort();
+          });
         });
-      });
+      }
     },
     deleteCourse: function deleteCourse(course, index) {
       var _this4 = this;
@@ -38276,38 +38290,49 @@ var render = function() {
                 },
                 [
                   _c("div", { staticClass: "modal-body" }, [
-                    _c("div", { staticClass: "form-group" }, [
-                      _c("label", { attrs: { for: "name" } }, [
-                        _vm._v("Nombre del Curso")
-                      ]),
-                      _vm._v(" "),
-                      _c("input", {
-                        directives: [
-                          {
-                            name: "model",
-                            rawName: "v-model",
-                            value: _vm.course.name,
-                            expression: "course.name"
-                          }
-                        ],
-                        staticClass: "form-control",
-                        attrs: {
-                          type: "text",
-                          id: "name",
-                          "aria-describedby": "emailHelp",
-                          placeholder: "Nombre del curso"
-                        },
-                        domProps: { value: _vm.course.name },
-                        on: {
-                          input: function($event) {
-                            if ($event.target.composing) {
-                              return
+                    _c(
+                      "div",
+                      { staticClass: "form-group" },
+                      [
+                        _c("label", { attrs: { for: "name" } }, [
+                          _vm._v("Nombre del Curso")
+                        ]),
+                        _vm._v(" "),
+                        _c("input", {
+                          directives: [
+                            {
+                              name: "model",
+                              rawName: "v-model",
+                              value: _vm.course.name,
+                              expression: "course.name"
                             }
-                            _vm.$set(_vm.course, "name", $event.target.value)
+                          ],
+                          staticClass: "form-control",
+                          attrs: {
+                            type: "text",
+                            id: "name",
+                            "aria-describedby": "emailHelp",
+                            placeholder: "Nombre del curso"
+                          },
+                          domProps: { value: _vm.course.name },
+                          on: {
+                            input: function($event) {
+                              if ($event.target.composing) {
+                                return
+                              }
+                              _vm.$set(_vm.course, "name", $event.target.value)
+                            }
                           }
-                        }
-                      })
-                    ]),
+                        }),
+                        _vm._v(" "),
+                        _vm._l(_vm.errors, function(error) {
+                          return _c("span", { staticClass: "text-danger" }, [
+                            _vm._v(_vm._s(error))
+                          ])
+                        })
+                      ],
+                      2
+                    ),
                     _vm._v(" "),
                     _c("div", { staticClass: "form-group" }, [
                       _c("label", { attrs: { for: "description" } }, [
@@ -38414,6 +38439,12 @@ var render = function() {
                       }
                     }),
                     _vm._v(" "),
+                    _vm._l(_vm.errors, function(error) {
+                      return _c("span", { staticClass: "text-danger" }, [
+                        _vm._v(_vm._s(error))
+                      ])
+                    }),
+                    _vm._v(" "),
                     _c("label", { attrs: { for: "description" } }, [
                       _vm._v("Descripcion del Curso")
                     ]),
@@ -38446,7 +38477,8 @@ var render = function() {
                     }),
                     _vm._v(" "),
                     _vm._m(7)
-                  ]
+                  ],
+                  2
                 )
               ])
             ])
