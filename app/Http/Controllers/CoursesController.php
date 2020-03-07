@@ -32,6 +32,9 @@ class CoursesController extends Controller
         $course->description = $request->description;
         $course->save();
         //$course=Course::create($request->all());
+        /**
+         * ESTE EMAIL SOLO SE ENVIARA EN PRODUCCION, POR MOTIVOS DE PRUEBA TODO SE ALMACENA EN UN LOG
+         * **/
         Mail::to('pruebas@zeroazul.com')->queue(new CourseRegisterEmail($course));
         return response()->json($course);
     }
