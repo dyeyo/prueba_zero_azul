@@ -40,6 +40,9 @@ class CoursesController extends Controller
     public function update(Request $request, $id)
     {
         $course=Course::find($id);
+        $this->validate($request,[
+            'name' => 'required'
+        ]);
         $course->name= $request->name;
         $course->description= $request->description;
         $course->update();
